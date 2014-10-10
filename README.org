@@ -48,3 +48,10 @@ Here is a simple diagram of these relationships:
 :              - Input Hash            Balance*
 :              - Input Index      
 : 
+
+The data should be loaded in the following order:
+
+  1. Blocks
+  2. Transactions
+  3. Inputs
+  4. Outputs
