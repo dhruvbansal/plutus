@@ -1,5 +1,4 @@
 #+TITLE Plutus
-#+SUBTITLE An attempt at hosting the entire blockchain on a TitanDB cluster to provide advanced analytical and forensic capability.
 
 * Data Model
 
