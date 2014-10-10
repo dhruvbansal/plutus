@@ -1,4 +1,4 @@
-#+TITLE Plutus
+#+TITLE:Plutus
 
 * Data Model
 
