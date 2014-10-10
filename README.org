@@ -1,0 +1,66 @@
+#+TITLE Plutus
+#+SUBTITLE An attempt at hosting the entire blockchain on a TitanDB cluster to provide advanced analytical and forensic capability.
+
+* Models
+
+** Address
+
+*** Associations
+    
+    - has many Transactions
+      
+*** Properties
+    
+  - value
+  - total_received
+  - final_balance
+  - num_transactions
+  - last_transaction
+  - created_on
+
+** Transaction
+
+*** Associations
+
+    - belongs to source (Address)
+    - belongs to target (Address)
+    - belongs to Block
+    - has many IP relays
+    - has many Confirmations
+
+*** Properties
+    
+    - timestamp
+    - size
+    - total input
+    - total output
+    - fees
+
+** Block
+
+*** Associations
+
+    - has many Transactions
+
+*** Properties
+
+    - created_on
+    - num_transactions
+    - output_total
+    - transaction_volume
+    - height
+    - relayed_by
+    - difficulty
+    - bits
+    - size
+    - version
+    - nonce
+    - reward
+    - hash
+    - previous_block
+    - next_block
+    - merkle_root
+
+** Confirmation   
+
+** IP
