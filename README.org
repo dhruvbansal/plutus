@@ -30,21 +30,21 @@ following command:
 
 reveals the data model used by the blockchain.
 
-#+BEGIN_VERBATIM
-     Transaction     --- contained in -->  Block
-  - ID, Hash, Version               - ID, Hash, Version, Timestamp
-    Fees, Output                      Difficulty, Nonce, Merkle*
-          |
-          |---- has input -----\
-          |  - Script          |
-          |  - Output Hash     |
-          |  - Output Index    |
-          |                    |
-          \---- has output ----|
-             - Value           |
-             - Script          \----> Address
-             - Rcvr Address        - ID, Hash
-             - Input Hash            Balance*
-             - Input Index      
-#+END_VERBATIM
+Here is a simple diagram of these relationships:
 
+:      Transaction     --- contained in -->  Block
+:   - ID, Hash, Version               - ID, Hash, Version, Timestamp
+:     Fees, Output                      Difficulty, Nonce, Merkle*
+:           |
+:           |---- has input -----\
+:           |  - Script          |
+:           |  - Output Hash     |
+:           |  - Output Index    |
+:           |                    |
+:           \---- has output ----|
+:              - Value           |
+:              - Script          \----> Address
+:              - Rcvr Address        - ID, Hash
+:              - Input Hash            Balance*
+:              - Input Index      
+: 
