@@ -1,0 +1,38 @@
+TitanGraph g = TitanFactory.open("/etc/titandb/titandb.properties")
+
+mgmt                    = g.getManagementSystem()
+
+block                   = mgmt.makeVertexLabel('block').make();
+transaction             = mgmt.makeVertexLabel('transaction').make();
+address                 = mgmt.makeVertexLabel('address').make();
+
+parent                  = mgmt.makeEdgeLabel('parent').multiplicity(SINGLE).make()
+included                = mgmt.makeEdgeLabel('included').multiplicity(MANY2ONE).make()
+input                   = mgmt.makeEdgeLabel('input').multiplicity(MANY2ONE).make()
+output                  = mgmt.makeEdgeLabel('output').multiplicity(MULTI).make()
+
+id                      = mgmt.makePropertyKey("id").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+hash                    = mgmt.makePropertyKey("hash").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+version                 = mgmt.makePropertyKey("version").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+output_value            = mgmt.makePropertyKey("output_value").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
+fees_value              = mgmt.makePropertyKey("fees_value").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
+size                    = mgmt.makePropertyKey("size").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+timestamp               = mgmt.makePropertyKey("timestamp").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+nonce                   = mgmt.makePropertyKey("nonce").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+difficulty              = mgmt.makePropertyKey("difficulty").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
+merkle                  = mgmt.makePropertyKey("merkle").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+num_transactions        = mgmt.makePropertyKey("num_transactions").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+num_inputs              = mgmt.makePropertyKey("num_inputs").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+num_outputs             = mgmt.makePropertyKey("num_outputs").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+lock_time               = mgmt.makePropertyKey("lock_time").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+balance                 = mgmt.makePropertyKey("balance").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
+index                   = mgmt.makePropertyKey("index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+script                  = mgmt.makePropertyKey("script").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+output_hash             = mgmt.makePropertyKey("output_hash").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+output_index            = mgmt.makePropertyKey("output_index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+input_hash              = mgmt.makePropertyKey("input_hash").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+input_index             = mgmt.makePropertyKey("input_index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
+value                   = mgmt.makePropertyKey("value").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
+receiver_address        = mgmt.makePropertyKey("receiver_address").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+
+mgmt.commit()
