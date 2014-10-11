@@ -8,7 +8,7 @@ address                 = mgmt.makeVertexLabel('address').make();
 
 parent                  = mgmt.makeEdgeLabel('parent').multiplicity(SINGLE).make()
 included                = mgmt.makeEdgeLabel('included').multiplicity(MANY2ONE).make()
-input                   = mgmt.makeEdgeLabel('input').multiplicity(MANY2ONE).make()
+input                   = mgmt.makeEdgeLabel('input').multiplicity(MULTI).make()
 output                  = mgmt.makeEdgeLabel('output').multiplicity(MULTI).make()
 
 id                      = mgmt.makePropertyKey("id").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()

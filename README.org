@@ -75,12 +75,12 @@ See the [[http://s3.thinkaurelius.com/docs/titan/current/schema.html][TitanDB sc
   
 *** Edges
 
-| Edge Label | Source Vertex Label | Target Vertex Label | Multiplicity | Reasoning                                                                                          |
-|------------+---------------------+---------------------+--------------+----------------------------------------------------------------------------------------------------|
-| parent     | block               | block               | SINGLE       | Every block has 1 parent...                                                                        |
-| included   | transaction         | block               | MANY2ONE     | Every transaction is included in 1 block...                                                        |
-| input      | address             | transaction         | MANY2ONE     | An address can only be used as an input in a single transaction...                                 |
-| output     | transaction         | address             | MULTI        | A transaction can use multiple outputs and the same output can be used in multiple transactions... |
+| Edge Label | Source Vertex Label | Target Vertex Label | Multiplicity | Reasoning                                                                                            |
+|------------+---------------------+---------------------+--------------+------------------------------------------------------------------------------------------------------|
+| parent     | block               | block               | SINGLE       | Every block has 1 parent (at least once it's confirmed?)...                                          |
+| included   | transaction         | block               | MANY2ONE     | Every transaction is included in 1 block (at least once it's confirmed?)...                          |
+| input      | address             | transaction         | MULTI        | A transaction can use multiple inputs and the same input can be used in multiple transactions (?)... |
+| output     | transaction         | address             | MULTI        | A transaction can use multiple outputs and the same output can be used in multiple transactions...   |
 
 *** Properties
 
