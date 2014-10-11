@@ -32,21 +32,26 @@ reveals the data model used by the blockchain.
 
 Here is a simple diagram of these relationships:
 
-:      Transaction     --- contained in -->  Block
-:   - ID, Hash, Version               - ID, Hash, Version, Timestamp
-:     Fees, Output                      Difficulty, Nonce, Merkle*
-:           |
-:           |---- has input -----\
-:           |  - Script          |
-:           |  - Output Hash     |
-:           |  - Output Index    |
-:           |                    |
-:           \---- has output ----|
-:              - Value           |
-:              - Script          \----> Address
-:              - Rcvr Address        - ID, Hash
-:              - Input Hash            Balance*
-:              - Input Index      
+:      TRANSACTION  <----- Contains ----  BLOCK
+:   - id, hash, version               - id, hash, version, timestamp
+:   - fees, output                    - difficulty, nonce, merkle*
+:        |    ^                           |                     ^
+:        |    |				  |                     |
+:        |    |                           \------- parent ------/ 
+:        |    |                            
+:        |    \------ Input -----\         
+:        |     - index            \                
+:        |     - script            \---  ADDRESS
+:        |     - output hash             - hash        ----> External
+:        |     - output index      /-->  - balance           Signals...
+:        |                        /      
+:        \----------- Output ----/
+:              - index
+:              - script
+:              - input Hash
+:              - input Index
+:              - value
+:              - receiver address
 : 
 
 The data should be loaded in the following order:
@@ -55,3 +60,56 @@ The data should be loaded in the following order:
   2. Transactions
   3. Inputs
   4. Outputs
+
+** Schema
+
+See the [[http://s3.thinkaurelius.com/docs/titan/current/schema.html][TitanDB schema docs]] for details:
+
+*** Vertices
+
+| Vertex Label | Property Key    | Property Key Data Type | Property Key Cardinality |
+|--------------+-----------------+------------------------+--------------------------|
+| Block        | ID              | Integer                | SINGLE                   |
+|              | Hash            | String                 | SINGLE                   |
+|              | Version         | Integer                | SINGLE                   |
+|              | Timestamp       | String                 | SINGLE                   |
+|              | Nonce           | String                 | SINGLE                   |
+|              | Difficulty      | Float                  | SINGLE                   |
+|              | Merkle          | String                 | SINGLE                   |
+|              | NumTransactions | Integer                | SINGLE                   |
+|              | OutputValue     | Float                  | SINGLE                   |
+|              | FeesValue       | Float                  | SINGLE                   |
+|              | Size            | Integer                | SINGLE                   |
+|--------------+-----------------+------------------------+--------------------------|
+| Transaction  | ID              | Integer                | SINGLE                   |
+|              | Hash            | String                 | SINGLE                   |
+|              | Version         | Integer                | SINGLE                   |
+|              | NumInputs       | Integer                | SINGLE                   |
+|              | NumOutputs      | Integer                | SINGLE                   |
+|              | OutputValue     | Float                  | SINGLE                   |
+|              | FeesValue       | Float                  | SINGLE                   |
+|              | LockTime        | Integer                | SINGLE                   |
+|              | Size            | Integer                | SINGLE                   |
+|--------------+-----------------+------------------------+--------------------------|
+| Address      | Hash            | String                 | SINGLE                   |
+|              | Balance         | Float                  | SINGLE                   |
+  
+*** Edges
+
+| Edge Label | Source Vertex Label | Target Vertex Label | Multiplicity | Property Key     | Property Key Data Type | Property Key Cardinality |
+|------------+---------------------+---------------------+--------------+------------------+------------------------+--------------------------|
+| parent     | Block               | Block               | SINGLE (?)   |                  |                        |                          |
+|------------+---------------------+---------------------+--------------+------------------+------------------------+--------------------------|
+| contains   | Block               | Transaction         | MANY2ONE     |                  |                        |                          |
+|------------+---------------------+---------------------+--------------+------------------+------------------------+--------------------------|
+| input      | Address             | Transaction         | MANY2ONE     | Index            | Integer                | SINGLE                   |
+|            |                     |                     |              | Script           | String                 | SINGLE                   |
+|            |                     |                     |              | OutputHash       | String                 | SINGLE                   |
+|            |                     |                     |              | OutputIndex      | Inteer                 | SINGLE                   |
+|------------+---------------------+---------------------+--------------+------------------+------------------------+--------------------------|
+| output     | Transaction         | Address             | ONE2MANY     | Index            | Integer                | SINGLE                   |
+|            |                     |                     |              | Script           | String                 | SINGLE                   |
+|            |                     |                     |              | InputHash        | String                 | SINGLE                   |
+|            |                     |                     |              | InputIndex       | Integer                | SINGLE                   |
+|            |                     |                     |              | Value            | Float                  | SINGLE                   |
+|            |                     |                     |              | Receiver Address | String                 | SINGLE                   |
