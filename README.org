@@ -36,7 +36,7 @@ Here is a simple diagram of these relationships:
 :   - id, hash, version               - id, hash, version, timestamp
 :   - fees, output                    - difficulty, nonce, merkle*
 :        |    ^                           |                     ^
-:        |    |				  |                     |
+:        |    |                           |                     |
 :        |    |                           \------- parent ------/ 
 :        |    |                            
 :        |    \------ Input -----\         
