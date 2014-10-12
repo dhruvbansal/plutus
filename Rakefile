@@ -56,13 +56,23 @@ def cql *args
 end
 
 def gremlin *args
-  command "gremlin -e #{project_path('gremlin', *args)}.groovy"
+  # FileUtils.cd(config["titan_home_dir"]) do
+    command "gremlin -e #{project_path('gremlin', *args)}.groovy"
+  # end
 end
 
 def template source, destination
   template = File.read(project_path('templates', source))
   engine   = Erubis::Eruby.new(template)
-  File.open(project_path(destination), 'w') { |f| f.puts(engine.evaluate(Erubis::Context.new(config))) }
+  File.open(destination, 'w') { |f| f.puts(engine.evaluate(Erubis::Context.new(config))) }
+end
+
+def rexster_config_path
+  project_path("config", environment, "rexster.xml")
+end
+
+def titan_config_path
+  project_path("config", environment, "plutus.properties")
 end
 
 task :env do
@@ -86,12 +96,12 @@ namespace :config do
 
   desc "Generate configuration files for TitanDB"
   task :titan   => [:env] do
-    template("plutus.properties.erb", "config/#{environment}/plutus.properties")
+    template("plutus.properties.erb", titan_config_path)
   end
 
   desc "Generate configuration files for Rexster"
   task :rexster => [:env] do
-    template("rexster.xml.erb", "config/#{environment}/rexster.xml")
+    template("rexster.xml.erb", rexster_config_path)
   end
   
 end
@@ -99,17 +109,17 @@ end
 namespace :titan do
   
   desc "Create the TitanDB graph"
-  task :create => [:env] do
+  task :create => ['config:titan'] do
     gremlin "create"
   end
 
   desc "Load data naively into the graph"
-  task :load => [:env] do
+  task :load => ['config:titan'] do
     gremlin "load"
   end
 
   desc "Delete all data!"
-  task :delete => [:env] do
+  task :delete => ['config:titan'] do
     gremlin "delete"
   end
   
@@ -122,4 +132,11 @@ namespace :titan do
   desc "Destroy, recreate and reload all data"
   task :rebuild => [:destroy, :create, :load]
   
+end
+
+desc "Start a Rexster server with the graph preloaded"
+task :rexster => ['config:rexster'] do
+  FileUtils.cd(config["titan_home_dir"]) do
+    exec "./bin/rexster.sh --start -c #{rexster_config_path}"
+  end
 end

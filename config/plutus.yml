@@ -5,6 +5,7 @@ defaults: &defaults
     index: plutus
   cassandra: &cassandradefaults
     keyspace: plutus
+  titan_home_dir: /usr/local/share/titandb
   titan: &titandefaults
     attributes.allow-all: false
     
@@ -21,6 +22,8 @@ defaults: &defaults
     storage.backend: cassandrathrift
 
     storage.cassandra.keyspace: plutus
+  rexster:
+    graph_name: Plutus
 
 dev:
   <<: *defaults

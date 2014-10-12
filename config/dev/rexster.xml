@@ -89,7 +89,7 @@
   </metrics>
   <graphs>
     <graph>
-      <graph-name>graph</graph-name>
+      <graph-name>Plutus</graph-name>
       <graph-type>com.thinkaurelius.titan.tinkerpop.rexster.TitanGraphConfiguration</graph-type>
       <graph-read-only>false</graph-read-only>
       <properties>

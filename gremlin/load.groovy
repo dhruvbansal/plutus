@@ -104,7 +104,7 @@ loadTransactions = {
     transaction.lockTime    = lockTime.toLong()
     transaction.size        = size.toLong()
     
-    block        = getOrCreateVertex("block", "tid", bid.toLong())
+    block        = getOrCreateVertex("block", "bid", bid.toLong())
     includedEdge = getOrCreateEdge("included", transaction, block)
   })
 }
