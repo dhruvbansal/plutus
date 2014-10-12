@@ -9,7 +9,7 @@ if (environment == null) {
 }
 println "Loading " + environment + " environment...";
 
-// Setup
+// Load
 println "Loading graph...";
 TitanGraph g = TitanFactory.open("config/" + environment + "/plutus.properties");
 mgmt         = g.getManagementSystem();
@@ -18,15 +18,19 @@ mgmt         = g.getManagementSystem();
 println "Defining property keys..."
 
 println "Defining bid..."
-bid = mgmt.makePropertyKey("bid").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+bid = mgmt.makePropertyKey("bid").dataType(Long.class).cardinality(Cardinality.SINGLE).make();
 mgmt.buildIndex('byBid',Vertex.class).addKey(bid).unique().buildCompositeIndex();
+
+println "Defining tid..."
+tid = mgmt.makePropertyKey("tid").dataType(Long.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byTid',Vertex.class).addKey(tid).unique().buildCompositeIndex();
 
 println "Defining hash..."
 hash = mgmt.makePropertyKey("hash").dataType(String.class).cardinality(Cardinality.SINGLE).make();
-mgmt.buildIndex('byHash',Vertex.class).addKey(hash).unique().buildCompositeIndex();
+mgmt.buildIndex('byHash',Vertex.class).addKey(hash).buildCompositeIndex();
 
 println "Defining version..."
-version = mgmt.makePropertyKey("version").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+version = mgmt.makePropertyKey("version").dataType(String.class).cardinality(Cardinality.SINGLE).make();
 mgmt.buildIndex('byVersion',Vertex.class).addKey(version).buildCompositeIndex();
 
 println "Defining outputValue..."
@@ -38,7 +42,7 @@ feesValue = mgmt.makePropertyKey("feesValue").dataType(Float.class).cardinality(
 mgmt.buildIndex('byFeesValue',Vertex.class).addKey(feesValue).buildMixedIndex("search");
 
 println "Defining size..."
-size = mgmt.makePropertyKey("size").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+size = mgmt.makePropertyKey("size").dataType(Long.class).cardinality(Cardinality.SINGLE).make();
 mgmt.buildIndex('bySize',Vertex.class).addKey(size).buildMixedIndex("search");
 
 println "Defining timestamp..."
@@ -70,7 +74,7 @@ numOutputs = mgmt.makePropertyKey("numOutputs").dataType(Integer.class).cardinal
 mgmt.buildIndex('byNumOutputs',Vertex.class).addKey(numOutputs).buildMixedIndex("search");
 
 println "Defining lockTime..."
-lockTime = mgmt.makePropertyKey("lockTime").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+lockTime = mgmt.makePropertyKey("lockTime").dataType(Long.class).cardinality(Cardinality.SINGLE).make();
 mgmt.buildIndex('byLockTime',Vertex.class).addKey(lockTime).buildMixedIndex("search");
 
 println "Defining balance..."
@@ -147,4 +151,4 @@ mgmt.buildEdgeIndex(output,'outputsByReceiverAddress',Direction.BOTH,Order.DESC,
 println "Committing..."
 mgmt.commit();
 println "Successful!"
-exit
+quit

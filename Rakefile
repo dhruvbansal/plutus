@@ -54,8 +54,8 @@ def cql *args
   command "cqlsh -e '#{query}' #{host} #{port || 9042}"
 end
 
-def gremlin path
-  command "gremlin -e #{path}"
+def gremlin *args
+  command "gremlin -e #{project_path('gremlin', *args)}.groovy"
 end
 
 task :env do
@@ -78,9 +78,14 @@ end
 namespace :titan do
   desc "Create the TitanDB graph schema"
   task :schema => [:env] do
-    gremlin project_path("config/schema.groovy")
+    gremlin "create_schema"
   end
-end
 
-desc "Destroy all data!"
-task :destroy => ["elasticsearch:destroy", "cassandra:destroy"]
+  desc "Load data naively"
+  task :load => [:env] do
+    gremlin "load"
+  end
+  
+  desc "Destroy all data!"
+  task :destroy => ["elasticsearch:destroy", "cassandra:destroy"]
+end
