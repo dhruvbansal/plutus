@@ -2,10 +2,26 @@
 
 defaults: &defaults
   elasticsearch: &elasticsearchdefaults
-    index: "plutus"
+    index: plutus
   cassandra: &cassandradefaults
-    keyspace: "plutus"
-      
+    keyspace: plutus
+  titan: &titandefaults
+    attributes.allow-all: false
+    
+    index.search.backend: elasticsearch
+    index.search.index-name: plutus
+    index.search.map-name: true
+    
+    index.search.elasticsearch.client-only: true
+    index.search.elasticsearch.cluster-name: elasticsearch
+    index.search.elasticsearch.interface: TRANSPORT_CLIENT
+
+    schema.default: none
+
+    storage.backend: cassandrathrift
+
+    storage.cassandra.keyspace: plutus
+
 dev:
   <<: *defaults
   elasticsearch:
@@ -16,3 +32,43 @@ dev:
     <<: *cassandradefaults
     hosts:
       - 127.0.0.1
+  titan:
+    <<: *titandefaults
+    cache.db-cache: true
+    index.search.hostname: 127.0.0.1
+
+    query.fast-property: true
+
+    storage.hostname: 127.0.0.1
+    
+    storage.cassandra.compression: false
+    storage.cassandra.replication-factor: 1
+
+bulk:
+  <<: *defaults
+  elasticsearch:
+    <<: *elasticsearchdefaults
+    hosts:
+      - 127.0.0.1:9200
+  cassandra:
+    <<: *cassandradefaults
+    hosts:
+      - 127.0.0.1
+  titan:
+    <<: *titandefaults
+    
+    ids.block-size: 200000
+    ids.renew-timeout: 300000 ms
+    ids.authority.wait-time: 2000 ms
+
+    metrics.enabled: true
+    metrics.merge-stores: true
+    metrics.prefix: titan
+    
+    metrics.console.interval: 30000
+
+    storage.batch-loading: true
+    storage.buffer-size: 10240
+    storage.read-time: 30000 ms
+    storage.write-time: 300000 ms
+    storage.cassandra.replication-factor: 1

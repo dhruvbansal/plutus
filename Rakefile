@@ -61,8 +61,8 @@ end
 
 def template source, destination
   template = File.read(project_path('templates', source))
-  engine   = Erubis::Eruby.new(input)
-  File.open(project_path(destination), 'w') { |f| f.puts(engine.result(config)) }
+  engine   = Erubis::Eruby.new(template)
+  File.open(project_path(destination), 'w') { |f| f.puts(engine.evaluate(Erubis::Context.new(config))) }
 end
 
 task :env do
@@ -91,7 +91,7 @@ namespace :config do
 
   desc "Generate configuration files for Rexster"
   task :rexster => [:env] do
-    template("rexster.xml.erb" "config/#{environment}/rexster.xml")
+    template("rexster.xml.erb", "config/#{environment}/rexster.xml")
   end
   
 end

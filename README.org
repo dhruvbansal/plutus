@@ -7,6 +7,15 @@ The raw data for the blockchain is generated using two tools:
   - [[https://en.bitcoin.it/wiki/Bitcoind][bitcoind]] which downloads the blockchain and keeps it synced
   - [[https://github.com/mcdee/blockparser][blockparser]] which dumps the blockchain data to CSV format
 
+As of approximately 2014-10-12 I have
+
+: $ wc -l /data1/blockchain/*
+:      317530 /data1/blockchain/blocks.csv
+:   108235459 /data1/blockchain/inputs.csv
+:   121222652 /data1/blockchain/outputs.csv
+:    45348658 /data1/blockchain/transactions.csv
+:   275,124,299 total
+
 Sample data from the output of blockparser (indeed, the first few 1000
 blocks & transactions) is included in the [[file:data][data]] directory.  The
 following command:
