@@ -25,8 +25,6 @@ mgmt         = g.getManagementSystem();
 //
 // Helper Functions
 //
-
-
 propertyKey = { name, dataType ->
   debug("Creating property key '$name' (${dataType})")
   return mgmt.makePropertyKey(name)
@@ -79,7 +77,7 @@ edgeLabel = { name, multiplicity ->
 }
 
 vertexEdgeIndex = { label, key, name, direction="BOTH", order="DESC" ->
-  debug("Creating vertex edge index '$name' for '${label}' edges on '${key}' (Direction.${direction}, Order.${order})")
+  debug("Creating vertex edge index '$name' for '${label}' edges on property key '${key}' (Direction.${direction}, Order.${order})")
   mgmt.buildEdgeIndex(label, name, Direction."$direction", Order."$order", key)
 }
 
@@ -88,67 +86,73 @@ edgeLabelWithVertexIndexes = { edgeName, multiplicity, indexes=[] ->
   label = edgeLabel(edgeName, multiplicity)
   for (index in indexes) {
     (key, keyName, direction, order) = index
-    if (direction && order) { vertexEdgeIndex(label, key, keyName, direction, order) }
-    if (direction)          { vertexEdgeIndex(label, key, keyName, direction)        }
-    if (order)              { vertexEdgeIndex(label, key, keyName, "BOTH", order)    }
-    else                    { vertexEdgeIndex(label, key, keyName)                   }
+    if (direction && order) { vertexEdgeIndex(label, key, keyName, direction, order) ; return label }
+    if (direction)          { vertexEdgeIndex(label, key, keyName, direction)        ; return label }
+    if (order)              { vertexEdgeIndex(label, key, keyName, "BOTH", order)    ; return label }
+    else                    { vertexEdgeIndex(label, key, keyName)                   ; return label }
   }
-  return label
 }
 
+//
 // Property Keys
+//
 info "Defining property keys..."
 
-bid         = propertyKeyWithCompositeIndex("bid",         Long.class,    Vertex.class, true)
-tid         = propertyKeyWithCompositeIndex("tid",         Long.class,    Vertex.class, true)
-bkHash      = propertyKeyWithCompositeIndex("bkHash",      String.class,  Vertex.class)
-txHash      = propertyKeyWithCompositeIndex("txHash",      String.class,  Vertex.class)
-version     = propertyKeyWithCompositeIndex("version",     String.class,  Vertex.class)
-outputValue = propertyKeyWithMixedIndex(    "outputValue", Float.class,   Vertex.class)
-feesValue   = propertyKeyWithMixedIndex(    "feesValue",   Float.class,   Vertex.class)
-size        = propertyKeyWithMixedIndex(    "size",        Long.class,    Vertex.class)
-timestamp   = propertyKeyWithMixedIndex(    "timestamp",   String.class,  Vertex.class)
-nonce       = propertyKeyWithCompositeIndex("nonce",       String.class,  Vertex.class)
-difficulty  = propertyKeyWithMixedIndex(    "difficulty",  Float.class,   Vertex.class)
-merkle      = propertyKeyWithCompositeIndex("merkle",      String.class,  Vertex.class)
-numTx       = propertyKeyWithMixedIndex(    "numTx",       Integer.class, Vertex.class)
-numInputs   = propertyKeyWithMixedIndex(    "numInputs",   Integer.class, Vertex.class)
-numOutputs  = propertyKeyWithMixedIndex(    "numOutputs",  Integer.class, Vertex.class)
-lockTime    = propertyKeyWithMixedIndex(    "lockTime",    Long.class,    Vertex.class)
-balance     = propertyKeyWithMixedIndex(    "balance",     Float.class,   Vertex.class)
-index       = propertyKeyWithCompositeIndex("index",       Integer.class, Edge.class)
-script      = propertyKeyWithCompositeIndex("script",      String.class,  Edge.class)
-outputHash  = propertyKeyWithCompositeIndex("outputHash",  String.class,  Edge.class)
-outputIndex = propertyKeyWithCompositeIndex("outputIndex", Integer.class, Edge.class)
-inputHash   = propertyKeyWithCompositeIndex("inputHash",   String.class,  Edge.class)
-inputIndex  = propertyKeyWithCompositeIndex("inputIndex",  Integer.class, Edge.class)
-value       = propertyKeyWithMixedIndex(    "value",       Float.class,   Edge.class)
-rcvrAddress = propertyKeyWithCompositeIndex("rcvrAddress", String.class,  Edge.class)
+bkid            = propertyKeyWithCompositeIndex("bkid",            Long.class,    Vertex.class, true)
+txid            = propertyKeyWithCompositeIndex("txid",            Long.class,    Vertex.class, true)
+hash            = propertyKeyWithCompositeIndex("hash",            String.class,  Vertex.class, true)
+bkHash          = propertyKeyWithCompositeIndex("bkHash",          String.class,  Vertex.class, true)
+txHash          = propertyKeyWithCompositeIndex("txHash",          String.class,  Vertex.class, true)
+version         = propertyKeyWithCompositeIndex("version",         String.class,  Vertex.class)
+outputValue     = propertyKeyWithMixedIndex(    "outputValue",     Long.class,    Vertex.class)
+feesValue       = propertyKeyWithMixedIndex(    "feesValue",       Long.class,    Vertex.class)
+size            = propertyKeyWithMixedIndex(    "size",            Long.class,    Vertex.class)
+timestamp       = propertyKeyWithMixedIndex(    "timestamp",       Long.class,    Vertex.class)
+nonce           = propertyKeyWithCompositeIndex("nonce",           String.class,  Vertex.class)
+difficulty      = propertyKeyWithMixedIndex(    "difficulty",      Float.class,   Vertex.class)
+merkle          = propertyKeyWithCompositeIndex("merkle",          String.class,  Vertex.class)
+numTx           = propertyKeyWithMixedIndex(    "numTx",           Integer.class, Vertex.class)
+numInputs       = propertyKeyWithMixedIndex(    "numInputs",       Integer.class, Vertex.class)
+numOutputs      = propertyKeyWithMixedIndex(    "numOutputs",      Integer.class, Vertex.class)
+lockTime        = propertyKeyWithMixedIndex(    "lockTime",        Long.class,    Vertex.class)
+balance         = propertyKeyWithMixedIndex(    "balance",         Long.class,    Vertex.class)
+index           = propertyKey(                  "index",           Integer.class)
+script          = propertyKeyWithCompositeIndex("script",          String.class,  Edge.class)
+outputTxIndex   = propertyKey(                  "outputTxIndex",   Integer.class)
+value           = propertyKeyWithMixedIndex(    "value",           Long.class,    Edge.class)
+rcvrAddressHash = propertyKeyWithCompositeIndex("rcvrAddressHash", String.class,  Edge.class)
 
+//
 // Vertex.class labels
+//
 info "Defining vertex labels..."
 block       = vertexLabel("block")
 transaction = vertexLabel("transaction")
 address     = vertexLabel("address")
 
+//
 // Edge.class labels & Vertex-Centric Indexes
+//
 info "Defining edge labels..."
-parent   = edgeLabel("parent", "SIMPLE")
+parent   = edgeLabel("parent",   "MANY2ONE")
 included = edgeLabel("included", "MANY2ONE")
 input    = edgeLabelWithVertexIndexes("input", "MULTI", [
-  [index,      "inputsByIndex"],
-  [script,     "inputsByScript"],
-  [outputHash, "inputsByOutputHash"],
-  [outputIndex,"inputsByOutputIndex"]
+  [index,         "inputsByIndex",         "IN"],
+  [script,        "inputsByScript",        "IN"],
+  [outputTxIndex, "inputsByOutputTxIndex", "IN"]
 ])
 output = edgeLabelWithVertexIndexes("output", "MULTI", [
-  [index,      "outputsByIndex"],
-  [script,     "outputsByScript"],
-  [inputHash,  "outputsByInputHash"],
-  [inputIndex, "outputsByInputIndex"],
-  [rcvrAddress,"outputsByRcvrAddress"]
+  [index,           "outputsByIndex"],
+  [script,          "outputsByScript"],
+  [rcvrAddressHash, "outputsByRcvrAddressHash"],  
+])
+spent = edgeLabelWithVertexIndexes("spent", "MULTI", [
+  [outputTxIndex,      "spentsByOutputTxIndex", "IN"]
 ])
 
+//
+// Commit
+// 
 info "Committing..."
 mgmt.commit();
 info "Successful!"

@@ -41,34 +41,24 @@ reveals the data model used by the blockchain.
 
 Here is a simple diagram of these relationships:
 
-:      transaction  ------ included --->  block
-:   - tid, txHash, version            - bid, bkHash, version, timestamp
-:   - fees, output                    - difficulty, nonce, merkle*
-:        |    ^                           |                     ^
-:        |    |                           |                     |
-:        |    |                           \------- parent ------/ 
-:        |    |                            
-:        |    \------ input -----\         
-:        |     - index            \                
-:        |     - script            \---  address
-:        |     - outputHash             - hash        ----> external
-:        |     - outputIndex      /-->  - balance           signals...
-:        |                        /      
-:        \----------- output ----/
-:              - index
-:              - script
-:              - inputHash
-:              - inputIndex
-:              - value
-:              - rcvrAddress
-: 
+:                                  /------- spent -------------\
+:                                  |                           |
+:                                  v                           |
+:   _______                   _____________                 _________
+:   |BLOCK| <--- included --- |TRANSACTION| --- output ---> |ADDRESS|
+:   -------                   -------------                 ---------
+:    |   ^	                  |   ^	          	    
+:    |   |	  	          |   |	         	  
+: /--/   \-------\	       /--/   \-------\        
+: |              |	       |              |                
+: \--- parent ---/	       \--- input ----/
 
 the data should be loaded in the following order:
 
   1. blocks
   2. transactions
-  3. inputs
-  4. outputs
+  3. outputs
+  4. inputs
 
 ** Schema
 
@@ -84,40 +74,41 @@ See the [[http://s3.thinkaurelius.com/docs/titan/current/schema.html][TitanDB sc
   
 *** Edges
 
-| Edge Label | Source Vertex Label | Target Vertex Label | Multiplicity | Reasoning                                                                                            |
-|------------+---------------------+---------------------+--------------+------------------------------------------------------------------------------------------------------|
-| parent     | block               | block               | SINGLE       | Every block has 1 parent (at least once it's confirmed?)...                                          |
-| included   | transaction         | block               | MANY2ONE     | Every transaction is included in 1 block (at least once it's confirmed?)...                          |
-| input      | address             | transaction         | MULTI        | A transaction can use multiple inputs and the same input can be used in multiple transactions (?)... |
-| output     | transaction         | address             | MULTI        | A transaction can use multiple outputs and the same output can be used in multiple transactions...   |
+| Edge Label | Source Vertex Label | Target Vertex Label | Multiplicity | Reasoning                                                                                                                 |
+|------------+---------------------+---------------------+--------------+---------------------------------------------------------------------------------------------------------------------------|
+| parent     | block               | block               | MANY2ONE     | Each block only has one parent but a given block can have multiple blocks claiming to descend from it (a blockchain fork) |
+| included   | transaction         | block               | MANY2ONE     | Every transaction is included in one block (at least once it's confirmed?)...                                             |
+| input      | transaction         | transaction         | MULTI        | A transaction can be an input in only one other transaction...except when it can appear more than once!                   |
+| output     | transaction         | address             | MULTI        | Each transaction can have multiple output addresses and multiple transactions can have the same address as output         |
+| spent      | address             | transaction         | MULTI        | Each address can only be spent in a single transaction...except when it can appear more than once!                        |
 
 *** Properties
 
-| Property Key | Property Key Data Type | Property Key Cardinality | Vertex Labels      | Edge Labels   | Flags  |
-|--------------+------------------------+--------------------------+--------------------+---------------+--------|
-| bid          | long                   | SINGLE                   | block              |               | unique |
-| tid          | long                   | SINGLE                   | transaction        |               | unique |
-| hash         | string                 | SINGLE                   | address            |               |        |
-| bkHash       | string                 | SINGLE                   | block              |               |        |
-| txHash       | string                 | SINGLE                   | transaction        |               |        |
-| version      | string                 | SINGLE                   | block, transaction |               |        |
-| outputValue  | float                  | SINGLE                   | block, transaction |               |        |
-| feesValue    | float                  | SINGLE                   | block, transaction |               |        |
-| size         | long                   | SINGLE                   | block, transaction |               |        |
-| timestamp    | string                 | SINGLE                   | block              |               |        |
-| nonce        | string                 | SINGLE                   | block              |               |        |
-| difficulty   | float                  | SINGLE                   | block              |               |        |
-| merkle       | string                 | SINGLE                   | block              |               |        |
-| numTx        | integer                | SINGLE                   | block              |               |        |
-| numInputs    | integer                | SINGLE                   | transaction        |               |        |
-| numOutputs   | integer                | SINGLE                   | transaction        |               |        |
-| lockTime     | long                   | SINGLE                   | transaction        |               |        |
-| balance      | float                  | SINGLE                   | address            |               |        |
-| index        | integer                | SINGLE                   |                    | input, output |        |
-| script       | string                 | SINGLE                   |                    | input, output |        |
-| outputHash   | string                 | SINGLE                   |                    | input         |        |
-| outputIndex  | inteer                 | SINGLE                   |                    | input         |        |
-| inputHash    | string                 | SINGLE                   |                    | output        |        |
-| inputIndex   | integer                | SINGLE                   |                    | output        |        |
-| value        | float                  | SINGLE                   |                    | output        |        |
-| rcvrAddress  | string                 | SINGLE                   |                    | output        |        |
+| Property Key    | Property Key Data Type | Property Key Cardinality | Vertex Labels      | Edge Labels   | Flags   | Key               |
+|-----------------+------------------------+--------------------------+--------------------+---------------+---------+-------------------|
+| bkid            | long                   | SINGLE                   | block              |               | unique  | composite         |
+| txid            | long                   | SINGLE                   | transaction        |               | unique  | composite         |
+|-----------------+------------------------+--------------------------+--------------------+---------------+---------+-------------------|
+| hash            | string                 | SINGLE                   | address            |               | unique  | composite         |
+| bkHash          | string                 | SINGLE                   | block              |               | unique  | composite         |
+| txHash          | string                 | SINGLE                   | transaction        |               | unique  | composite         |
+|-----------------+------------------------+--------------------------+--------------------+---------------+---------+-------------------|
+| version         | string                 | SINGLE                   | block, transaction |               |         | composite         |
+| outputValue     | long                   | SINGLE                   | block, transaction |               |         | mixed             |
+| feesValue       | long                   | SINGLE                   | block, transaction |               |         | mixed             |
+| size            | long                   | SINGLE                   | block, transaction |               |         | mixed             |
+| timestamp       | long                   | SINGLE                   | block              |               |         | mixed             |
+| nonce           | string                 | SINGLE                   | block              |               |         | composite         |
+| difficulty      | float                  | SINGLE                   | block              |               |         | mixed             |
+| merkle          | string                 | SINGLE                   | block              |               |         | composite         |
+| numTx           | integer                | SINGLE                   | block              |               | precalc | mixed             |
+| numInputs       | integer                | SINGLE                   | transaction        |               | precalc | mixed             |
+| numOutputs      | integer                | SINGLE                   | transaction        |               | precalc | mixed             |
+| lockTime        | long                   | SINGLE                   | transaction        |               |         | mixed             |
+| balance         | long                   | SINGLE                   | address            |               | precalc | mixed             |
+|-----------------+------------------------+--------------------------+--------------------+---------------+---------+-------------------|
+| index           | integer                | SINGLE                   |                    | input, output |         | vertex            |
+| script          | string                 | SINGLE                   |                    | input, output |         | composite, vertex |
+| outputTxIndex   | integer                | SINGLE                   |                    | input, spent  |         | vertex            |
+| value           | long                   | SINGLE                   |                    | output        |         | mixed, vertex     |
+| rcvrAddressHash | string                 | SINGLE                   |                    | output        |         | composite, vertex |
