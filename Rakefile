@@ -65,6 +65,7 @@ def template source, destination
   template = File.read(project_path('templates', source))
   engine   = Erubis::Eruby.new(template)
   File.open(destination, 'w') { |f| f.puts(engine.evaluate(Erubis::Context.new(config))) }
+  log.debug("Created #{destination}")
 end
 
 def rexster_config_path
@@ -76,6 +77,7 @@ def titan_config_path
 end
 
 task :env do
+  log.info("Starting in #{environment.upcase} environment")
 end
 
 namespace :elasticsearch do
