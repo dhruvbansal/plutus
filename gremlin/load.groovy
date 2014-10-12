@@ -3,20 +3,33 @@ environment = System.getenv()["PLUTUS_ENV"]
 if (environment == null) {
   environment = "dev"
 }
-println "Loading " + environment + " environment..."
+println "Loading $environment environment..."
 
 // Load
 println "Loading graph..."
-TitanGraph g  = TitanFactory.open("config/" + environment + "/plutus.properties")
+TitanGraph g = TitanFactory.open("config/${environment}/plutus.properties")
+
+// 
+// Helper Functions
+// 
+
 logFrequency = 100
+log = { level, message ->
+  println "[" + new Date() + "] " + level + " : " + message
+}
+info  = { message -> log("INFO",  message) }
+warn  = { message -> log("WARN",  message) }
+error = { message -> log("ERROR", message) }
 
 getOrCreateVertex = { vertexLabel, idField, id ->
   existing = g.V(idField, id)
   if (existing.hasNext()) {
-    return existing.next()
+    vertex = existing.next()
   } else {
-    return g.addVertex(vertexLabel)
+    vertex = g.addVertex(vertexLabel)
   }
+  vertex."$idField" = id
+  return vertex
 }
 
 getOrCreateEdge = { edgeLabel, source, target ->
@@ -28,85 +41,76 @@ getOrCreateEdge = { edgeLabel, source, target ->
   }
 }
 
-// Log
-log = { level, message ->
-  println "[" + new Date() + "] " + level + " : " + message
+loadDataType = { name, lineProcessor ->
+  lineNum = 0
+  new File("data/${environment}/${name}.csv").eachLine({ line ->
+    try {
+      lineNum += 1
+      lineProcessor(line)
+    } catch (Throwable e) {
+      error(e.toString())
+    }
+    if (lineNum % logFrequency == 0) { info("Loaded line ${lineNum} of ${name}...") }
+  })
+  println "Committing..."
+  g.commit()
+  info("Successfully loaded all " + name + "!")
 }
-info  = { message -> log("INFO",  message) }
-warn  = { message -> log("WARN",  message) }
-error = { message -> log("ERROR", message) }
-
+  
+//
 // Blocks
+//
 loadBlocks = {
   lastBlock = null
-  new File("data/" + environment + "/blocks.csv").eachLine({ line ->
-    try {
-      (bid,hash,version,timestamp,nonce,difficulty,merkle,numTransactions,outputValue,feesValue,size) = line.split(",")
+  loadDataType("blocks", { line ->
+    (bid,bkHash,version,timestamp,nonce,difficulty,merkle,numTx,outputValue,feesValue,size) = line.split(",")
+    if (bid == "ID") { return };
+    block = getOrCreateVertex("block", "bid", bid.toLong())
     
-      if (bid == "ID") { return };
-      ibid  = bid.toLong()
-      block = getOrCreateVertex("block", "bid", ibid)
+    block.bkHash      = bkHash
+    block.version     = version
+    block.timestamp   = timestamp
+    block.nonce       = nonce
+    block.difficulty  = difficulty.toFloat()
+    block.merkle      = merkle
+    block.numTx       = numTx.toInteger()
+    block.outputValue = outputValue.toFloat()
+    block.feesValue   = feesValue.toFloat()
+    block.size        = size.toLong()
     
-      block.bid             = ibid
-      block.hash            = hash
-      block.version         = version
-      block.timestamp       = timestamp
-      block.nonce           = nonce
-      block.difficulty      = difficulty.toFloat()
-      block.merkle          = merkle
-      block.numTransactions = numTransactions.toInteger()
-      block.outputValue     = outputValue.toFloat()
-      block.feesValue       = feesValue.toFloat()
-      block.size            = size.toLong()
-    
-      if (lastBlock) {
-	parentEdge = getOrCreateEdge("parent", block, lastBlock)
-      } else {
-	lastBlock = block
-      }
-    
-      if (ibid % logFrequency == 0) { info("Loaded block " + bid) }
-    } catch (Throwable e) {
-      error(e.toString())
+    if (lastBlock) {
+      parentEdge = getOrCreateEdge("parent", block, lastBlock)
     }
+    lastBlock = block
   })
-  g.commit()
-  info("Loaded all blocks")
 }
 
+//
 // Transactions
+//
 loadTransactions = {
-  new File("data/" + environment + "/transactions.csv").eachLine({ line ->
-    try {
-      (tid,hash,version,blockId,numInputs,numOutputs,outputValue,feesValue,lockTime,size) = line.split(",")
+  loadDataType("transactions", { line ->
+    (tid,txHash,version,bid,numInputs,numOutputs,outputValue,feesValue,lockTime,size) = line.split(",")
     
-      if (tid == "ID") { return };
-      itid        = tid.toLong()
-      transaction = getOrCreateVertex("transaction", "tid", itid)
+    if (tid == "ID") { return };
+    transaction = getOrCreateVertex("transaction", "tid", tid.toLong())
     
-      transaction.tid         = itid
-      transaction.hash        = hash
-      transaction.version     = version
-      transaction.numInputs   = numInputs.toInteger()
-      transaction.numOutputs  = numOutputs.toInteger()
-      transaction.outputValue = outputValue.toFloat()
-      transaction.feesValue   = feesValue.toFloat()
-      transaction.lockTime    = lockTime.toLong()
-      transaction.size        = size.toLong()
-
-      block        = getOrCreateVertex("block", "tid", blockId.toInteger())
-      includedEdge = getOrCreateEdge("included", transaction, block)
+    transaction.txHash      = txHash
+    transaction.version     = version
+    transaction.numInputs   = numInputs.toInteger()
+    transaction.numOutputs  = numOutputs.toInteger()
+    transaction.outputValue = outputValue.toFloat()
+    transaction.feesValue   = feesValue.toFloat()
+    transaction.lockTime    = lockTime.toLong()
+    transaction.size        = size.toLong()
     
-      if (itid % logFrequency == 0) { info("Loaded transaction " + tid) }
-    } catch (Throwable e) {
-      error(e.toString())
-    }
+    block        = getOrCreateVertex("block", "tid", bid.toLong())
+    includedEdge = getOrCreateEdge("included", transaction, block)
   })
-  g.commit()
-  info("Loaded all transactions")
 }
 
+//
+// Run
+//
 loadBlocks()
 loadTransactions()
-
-quit

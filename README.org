@@ -33,7 +33,7 @@ reveals the data model used by the blockchain.
 Here is a simple diagram of these relationships:
 
 :      transaction  ------ included --->  block
-:   - tid, hash, version              - bid, hash, version, timestamp
+:   - tid, txHash, version            - bid, bkHash, version, timestamp
 :   - fees, output                    - difficulty, nonce, merkle*
 :        |    ^                           |                     ^
 :        |    |                           |                     |
@@ -42,16 +42,16 @@ Here is a simple diagram of these relationships:
 :        |    \------ input -----\         
 :        |     - index            \                
 :        |     - script            \---  address
-:        |     - output hash             - hash        ----> external
-:        |     - output index      /-->  - balance           signals...
+:        |     - outputHash             - hash        ----> external
+:        |     - outputIndex      /-->  - balance           signals...
 :        |                        /      
 :        \----------- output ----/
 :              - index
 :              - script
-:              - input hash
-:              - input index
+:              - inputHash
+:              - inputIndex
 :              - value
-:              - receiver address
+:              - rcvrAddress
 : 
 
 the data should be loaded in the following order:
@@ -84,29 +84,31 @@ See the [[http://s3.thinkaurelius.com/docs/titan/current/schema.html][TitanDB sc
 
 *** Properties
 
-| Property Key     | Property Key Data Type | Property Key Cardinality | Vertex Labels               | Edge Labels   | Flags  |
-|------------------+------------------------+--------------------------+-----------------------------+---------------+--------|
-| bid              | long                   | SINGLE                   | block                       |               | unique |
-| tid              | long                   | SINGLE                   | transaction                 |               | unique |
-| hash             | string                 | SINGLE                   | block, transaction, address |               |        |
-| version          | string                 | SINGLE                   | block, transaction          |               |        |
-| output_value     | float                  | SINGLE                   | block, transaction          |               |        |
-| fees_value       | float                  | SINGLE                   | block, transaction          |               |        |
-| size             | long                   | SINGLE                   | block, transaction          |               |        |
-| timestamp        | string                 | SINGLE                   | block                       |               |        |
-| nonce            | string                 | SINGLE                   | block                       |               |        |
-| difficulty       | float                  | SINGLE                   | block                       |               |        |
-| merkle           | string                 | SINGLE                   | block                       |               |        |
-| num_transactions | integer                | SINGLE                   | block                       |               |        |
-| num_inputs       | integer                | SINGLE                   | transaction                 |               |        |
-| num_outputs      | integer                | SINGLE                   | transaction                 |               |        |
-| lock_time        | long                   | SINGLE                   | transaction                 |               |        |
-| balance          | float                  | SINGLE                   | address                     |               |        |
-| index            | integer                | SINGLE                   |                             | input, output |        |
-| script           | string                 | SINGLE                   |                             | input, output |        |
-| output_hash      | string                 | SINGLE                   |                             | input         |        |
-| output_index     | inteer                 | SINGLE                   |                             | input         |        |
-| input_hash       | string                 | SINGLE                   |                             | output        |        |
-| input_index      | integer                | SINGLE                   |                             | output        |        |
-| value            | float                  | SINGLE                   |                             | output        |        |
-| receiver_address | string                 | SINGLE                   |                             | output        |        |
+| Property Key | Property Key Data Type | Property Key Cardinality | Vertex Labels      | Edge Labels   | Flags  |
+|--------------+------------------------+--------------------------+--------------------+---------------+--------|
+| bid          | long                   | SINGLE                   | block              |               | unique |
+| tid          | long                   | SINGLE                   | transaction        |               | unique |
+| hash         | string                 | SINGLE                   | address            |               |        |
+| bkHash       | string                 | SINGLE                   | block              |               |        |
+| txHash       | string                 | SINGLE                   | transaction        |               |        |
+| version      | string                 | SINGLE                   | block, transaction |               |        |
+| outputValue  | float                  | SINGLE                   | block, transaction |               |        |
+| feesValue    | float                  | SINGLE                   | block, transaction |               |        |
+| size         | long                   | SINGLE                   | block, transaction |               |        |
+| timestamp    | string                 | SINGLE                   | block              |               |        |
+| nonce        | string                 | SINGLE                   | block              |               |        |
+| difficulty   | float                  | SINGLE                   | block              |               |        |
+| merkle       | string                 | SINGLE                   | block              |               |        |
+| numTx        | integer                | SINGLE                   | block              |               |        |
+| numInputs    | integer                | SINGLE                   | transaction        |               |        |
+| numOutputs   | integer                | SINGLE                   | transaction        |               |        |
+| lockTime     | long                   | SINGLE                   | transaction        |               |        |
+| balance      | float                  | SINGLE                   | address            |               |        |
+| index        | integer                | SINGLE                   |                    | input, output |        |
+| script       | string                 | SINGLE                   |                    | input, output |        |
+| outputHash   | string                 | SINGLE                   |                    | input         |        |
+| outputIndex  | inteer                 | SINGLE                   |                    | input         |        |
+| inputHash    | string                 | SINGLE                   |                    | output        |        |
+| inputIndex   | integer                | SINGLE                   |                    | output        |        |
+| value        | float                  | SINGLE                   |                    | output        |        |
+| rcvrAddress  | string                 | SINGLE                   |                    | output        |        |

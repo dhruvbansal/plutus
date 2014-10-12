@@ -3,6 +3,7 @@ require 'pathname'
 require 'yaml'
 require 'net/http'
 require 'logger'
+require 'erubis'
 
 def project_root
   @project_root ||= Pathname.new(File.dirname(__FILE__))
@@ -58,6 +59,12 @@ def gremlin *args
   command "gremlin -e #{project_path('gremlin', *args)}.groovy"
 end
 
+def template source, destination
+  template = File.read(project_path('templates', source))
+  engine   = Erubis::Eruby.new(input)
+  File.open(project_path(destination), 'w') { |f| f.puts(engine.result(config)) }
+end
+
 task :env do
 end
 
@@ -75,17 +82,44 @@ namespace :cassandra do
   end
 end
 
-namespace :titan do
-  desc "Create the TitanDB graph schema"
-  task :schema => [:env] do
-    gremlin "create_schema"
+namespace :config do
+
+  desc "Generate configuration files for TitanDB"
+  task :titan   => [:env] do
+    template("plutus.properties.erb", "config/#{environment}/plutus.properties")
   end
 
-  desc "Load data naively"
+  desc "Generate configuration files for Rexster"
+  task :rexster => [:env] do
+    template("rexster.xml.erb" "config/#{environment}/rexster.xml")
+  end
+  
+end
+
+namespace :titan do
+  
+  desc "Create the TitanDB graph"
+  task :create => [:env] do
+    gremlin "create"
+  end
+
+  desc "Load data naively into the graph"
   task :load => [:env] do
     gremlin "load"
   end
+
+  desc "Delete all data!"
+  task :delete => [:env] do
+    gremlin "delete"
+  end
   
-  desc "Destroy all data!"
+  desc "Destroy all databases!"
   task :destroy => ["elasticsearch:destroy", "cassandra:destroy"]
+
+  desc "Delete and reload all data"
+  task :reload => [:delete, :load]
+
+  desc "Destroy, recreate and reload all data"
+  task :rebuild => [:destroy, :create, :load]
+  
 end

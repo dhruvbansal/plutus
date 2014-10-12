@@ -1,10 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    erubis (2.7.0)
     rake (10.3.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  erubis
   rake
