@@ -1,38 +1,103 @@
-TitanGraph g = TitanFactory.open("/etc/titandb/titandb.properties")
+// composite: mgmt.buildIndex('byName',Vertex.class).addKey(name).buildCompositeIndex()
+// mixed: mgmt.buildIndex('nameAndAge',Vertex.class).addKey(name).addKey(age).buildMixedIndex("search")
+// vertex: mgmt.buildEdgeIndex(battled,'battlesByTime',Direction.BOTH,Order.DESC,time)
 
-mgmt                    = g.getManagementSystem()
+// Setup
+TitanGraph g = TitanFactory.open("config/titan-blockchain.bulk-loading.properties");
+mgmt         = g.getManagementSystem();
 
-block                   = mgmt.makeVertexLabel('block').make();
-transaction             = mgmt.makeVertexLabel('transaction').make();
-address                 = mgmt.makeVertexLabel('address').make();
+// Property Keys
+id = mgmt.makePropertyKey("id").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byId',Vertex.class).addKey(id).unique().buildCompositeIndex();
 
-parent                  = mgmt.makeEdgeLabel('parent').multiplicity(SINGLE).make()
-included                = mgmt.makeEdgeLabel('included').multiplicity(MANY2ONE).make()
-input                   = mgmt.makeEdgeLabel('input').multiplicity(MULTI).make()
-output                  = mgmt.makeEdgeLabel('output').multiplicity(MULTI).make()
+hash = mgmt.makePropertyKey("hash").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byHash',Vertex.class).addKey(hash).unique().buildCompositeIndex();
 
-id                      = mgmt.makePropertyKey("id").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-hash                    = mgmt.makePropertyKey("hash").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-version                 = mgmt.makePropertyKey("version").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-output_value            = mgmt.makePropertyKey("output_value").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
-fees_value              = mgmt.makePropertyKey("fees_value").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
-size                    = mgmt.makePropertyKey("size").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-timestamp               = mgmt.makePropertyKey("timestamp").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-nonce                   = mgmt.makePropertyKey("nonce").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-difficulty              = mgmt.makePropertyKey("difficulty").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
-merkle                  = mgmt.makePropertyKey("merkle").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-num_transactions        = mgmt.makePropertyKey("num_transactions").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-num_inputs              = mgmt.makePropertyKey("num_inputs").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-num_outputs             = mgmt.makePropertyKey("num_outputs").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-lock_time               = mgmt.makePropertyKey("lock_time").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-balance                 = mgmt.makePropertyKey("balance").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
-index                   = mgmt.makePropertyKey("index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-script                  = mgmt.makePropertyKey("script").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-output_hash             = mgmt.makePropertyKey("output_hash").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-output_index            = mgmt.makePropertyKey("output_index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-input_hash              = mgmt.makePropertyKey("input_hash").dataType(String.class).cardinality(Cardinality.SINGLE).make()
-input_index             = mgmt.makePropertyKey("input_index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make()
-value                   = mgmt.makePropertyKey("value").dataType(Float.class).cardinality(Cardinality.SINGLE).make()
-receiver_address        = mgmt.makePropertyKey("receiver_address").dataType(String.class).cardinality(Cardinality.SINGLE).make()
+version = mgmt.makePropertyKey("version").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byVersion',Vertex.class).addKey(Version).buildCompositeIndex();
 
-mgmt.commit()
+outputValue = mgmt.makePropertyKey("outputValue").dataType(Float.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byOutputValue',Vertex.class).addKey(outputValue).buildMixedIndex("search");
+
+feesValue = mgmt.makePropertyKey("feesValue").dataType(Float.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byFeesValue',Vertex.class).addKey(feesValue).buildMixedIndex("search");
+
+size = mgmt.makePropertyKey("size").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('bySize',Vertex.class).addKey(size).buildMixedIndex("search");
+
+timestamp = mgmt.makePropertyKey("timestamp").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byTimestamp',Vertex.class).addKey(timestamp).buildMixedIndex("search");
+
+nonce = mgmt.makePropertyKey("nonce").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byNonce',Vertex.class).addKey(hash).buildCompositeIndex();
+
+difficulty = mgmt.makePropertyKey("difficulty").dataType(Float.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byDifficulty',Vertex.class).addKey(difficulty).buildMixedIndex("search");
+
+merkle = mgmt.makePropertyKey("merkle").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byMerkle',Vertex.class).addKey(merkle).buildCompositeIndex();
+
+numTransactions = mgmt.makePropertyKey("numTransactions").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byNumTransactions',Vertex.class).addKey(numTransactions).buildMixedIndex("search");
+
+numInputs = mgmt.makePropertyKey("numInputs").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byNumInputs',Vertex.class).addKey(numInputs).buildMixedIndex("search");
+
+numOutputs = mgmt.makePropertyKey("numOutputs").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byNumOutputs',Vertex.class).addKey(numOutputs).buildMixedIndex("search");
+
+lockTime = mgmt.makePropertyKey("lockTime").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byLockTime',Vertex.class).addKey(lockTime).buildMixedIndex("search");
+
+balance = mgmt.makePropertyKey("balance").dataType(Float.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byBalance',Vertex.class).addKey(balance).buildMixedIndex("search");
+
+index = mgmt.makePropertyKey("index").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byIndex',Edge.class).addKey(index).buildCompositeIndex();
+
+script = mgmt.makePropertyKey("script").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byScript',Edge.class).addKey(script).buildCompositeIndex();
+
+outputHash = mgmt.makePropertyKey("outputHash").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byOutputHash',Edge.class).addKey(outputHash).buildCompositeIndex();
+
+outputIndex = mgmt.makePropertyKey("outputIndex").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byOutputIndex',Edge.class).addKey(outputIndex).buildCompositeIndex();
+
+inputHash = mgmt.makePropertyKey("inputHash").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byInputHash',Edge.class).addKey(inputHash).buildCompositeIndex();
+
+inputIndex = mgmt.makePropertyKey("inputIndex").dataType(Integer.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byInputIndex',Edge.class).addKey(inputIndex).buildCompositeIndex();
+
+value = mgmt.makePropertyKey("value").dataType(Float.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byValue',Edge.class).addKey(value).buildMixedIndex("search");
+
+receiverAddress = mgmt.makePropertyKey("receiverAddress").dataType(String.class).cardinality(Cardinality.SINGLE).make();
+mgmt.buildIndex('byReceiverAddress',Edge.class).addKey(receiverAddress).buildCompositeIndex();
+
+// Vertex labels
+block       = mgmt.makeVertexLabel('block').make();;
+transaction = mgmt.makeVertexLabel('transaction').make();;
+address     = mgmt.makeVertexLabel('address').make();;
+
+// Edge labels
+parent = mgmt.makeEdgeLabel('parent').multiplicity(SINGLE).make();
+
+included = mgmt.makeEdgeLabel('included').multiplicity(MANY2ONE).make();
+
+input = mgmt.makeEdgeLabel('input').multiplicity(MULTI).make();
+mgmt.buildEdgeIndex(input,'inputsByIndex',Direction.BOTH,Order.DESC,index)
+mgmt.buildEdgeIndex(input,'inputsByScript',Direction.BOTH,Order.DESC,script)
+mgmt.buildEdgeIndex(input,'inputsByOutputHash',Direction.BOTH,Order.DESC,outputHash)
+mgmt.buildEdgeIndex(input,'inputsByOutputIndex',Direction.BOTH,Order.DESC,outputIndex)
+
+output = mgmt.makeEdgeLabel('output').multiplicity(MULTI).make();
+mgmt.buildEdgeIndex(output,'outputsByIndex',Direction.BOTH,Order.DESC,index)
+mgmt.buildEdgeIndex(output,'outputsByScript',Direction.BOTH,Order.DESC,script)
+mgmt.buildEdgeIndex(output,'outputsByInputHash',Direction.BOTH,Order.DESC,inputHash)
+mgmt.buildEdgeIndex(output,'outputsByInputIndex',Direction.BOTH,Order.DESC,inputIndex)
+mgmt.buildEdgeIndex(output,'outputsByValue',Direction.BOTH,Order.DESC,value)
+mgmt.buildEdgeIndex(output,'outputsByReceiverAddress',Direction.BOTH,Order.DESC,receiverAddress)
+
+mgmt.commit();
