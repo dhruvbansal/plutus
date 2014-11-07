@@ -1,0 +1,105 @@
+digraph blockchain {
+ block [shape="rect",label=<
+	<table>
+	  <tr>
+  	    <td colspan="2">Block</td>
+	  </tr>
+ 	  <tr>
+	    <td><b>ID</b></td>
+	    <td>Consecutive block ID</td>
+	  </tr>
+	  <tr>
+	    <td><b>Version</b></td>
+	    <td>Bitcoin version protocol</td>
+	  </tr>
+	  <tr>
+	    <td><b>Timestamp</b></td>
+	    <td>Time this block was mined</td>
+	  </tr>
+	  <tr>
+	    <td><b>Hash</b></td>
+	    <td>This block's hash</td>
+	  </tr>
+	  <tr>
+	    <td><b>Value</b></td>
+	    <td>Total of all outputs from included transactions</td>
+	  </tr>
+	  <tr>
+	    <td><b>Fees</b></td>
+	    <td>Total of all included transactions</td>
+	  </tr>
+	  <tr>
+	    <td><b>Size</b></td>
+	    <td>Total size in bytes of all included transactions</td>
+	  </tr>
+	  <tr>
+	    <td><b>Difficulty</b></td>
+	    <td>This block's difficulty</td>
+	  </tr>
+	  <tr>
+	    <td><b>Nonce</b></td>
+	    <td>Nonce used to solve this block</td>
+	  </tr>
+	  <tr>
+	    <td><b>Merkle root</b></td>
+	    <td>Merkle root of all included transactions</td>
+	  </tr>
+	</table>>];
+ transaction [shape="rect",label=<
+	<table>
+	  <tr>
+  	    <td colspan="2">Transaction</td>
+	  </tr>
+ 	  <tr>
+	    <td><b>ID</b></td>
+	    <td>Consecutive transaction ID</td>
+	  </tr>
+	  <tr>
+	    <td><b>Version</b></td>
+	    <td>Bitcoin version protocol</td>
+	  </tr>
+	  <tr>
+	    <td><b>Hash</b></td>
+	    <td>This transaction's hash</td>
+	  </tr>
+	  <tr>
+	    <td><b>Value</b></td>
+	    <td>This transaction's output value</td>
+	  </tr>
+	  <tr>
+	    <td><b>Fees</b></td>
+	    <td>Fees for this transaction</td>
+	  </tr>
+	  <tr>
+	    <td><b>Size</b></td>
+	    <td>Size in bytes of this transaction</td>
+	  </tr>
+	  <tr>
+	    <td><b>Lock time</b></td>
+	    <td>Lock time of this transaction</td>
+	  </tr>
+	</table>	      
+	      >];
+ address [shape="rect",label=<
+	<table>
+	  <tr>
+  	    <td colspan="2">Address</td>
+	  </tr>
+	  <tr>
+	    <td><b>Hash</b></td>
+	    <td>This address's hash</td>
+	  </tr>
+	  <tr>
+	    <td><b>Balance</b></td>
+	    <td>This address's unspent balance</td>
+	  </tr>
+	</table>>];
+
+ transaction -> block [label="Included in"];
+ transaction -> transaction [label="Input for"];
+ transaction -> address [label="Output sent to"];
+ 
+ block -> block [label="Parent Of",style="dashed"];
+ address -> transaction [label="Spent in",style="dashed"];
+ address -> address [label="Sends BTC to",style="dashed"];
+}

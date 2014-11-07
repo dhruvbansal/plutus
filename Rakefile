@@ -142,3 +142,12 @@ task :rexster => ['config:rexster'] do
     exec "./bin/rexster.sh --start -c #{rexster_config_path}"
   end
 end
+
+namespace :doc do
+
+  desc "Create an image representing the graph data model for bitcoin"
+  task :data_model => [:env] do
+    
+  end
+  
+end
