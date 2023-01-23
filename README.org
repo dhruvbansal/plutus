@@ -111,4 +111,4 @@ See the [[http://s3.thinkaurelius.com/docs/titan/current/schema.html][TitanDB sc
 | script          | string                 | SINGLE                   |                    | input, output |         | composite, vertex |
 | outputTxIndex   | integer                | SINGLE                   |                    | input, spent  |         | vertex            |
 | value           | long                   | SINGLE                   |                    | output        |         | mixed, vertex     |
-| rcvrAddressHash | string                 | SINGLE                   |                    | output        |         | composite, vertex |
+| rcvrAddressHash | string                 | SINGLE                   |                    | output        |         | composite, vertex | 
